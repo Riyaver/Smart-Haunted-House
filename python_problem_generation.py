@@ -106,10 +106,10 @@ def generate_problem(mqtt_live_state):
     with OneshotPlanner(name='fast-downward') as planner:
         result = planner.solve(problem)
         if result.plan:
-            print(f"[System Server] Strategy successfully optimized. Status: {result.status.name}")
+            print(f"Status: {result.status.name}")
             return result.plan.actions
         else:
-            print("[System Server] Goal target already met. No sequence required.")
+            print("Goal met")
             return []
 
 if __name__ == "__main__":

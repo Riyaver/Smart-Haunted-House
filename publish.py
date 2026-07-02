@@ -3,7 +3,7 @@ import json
 import paho.mqtt.client as mqtt
 import grovepi
 
-MQTT_BROKER = "localhost"  # IP of your central central brain Pi
+MQTT_BROKER = "localhost" 
 TOPIC = "haunted_house/sensors/game2/ultrasonic"
 
 client = mqtt.Client()

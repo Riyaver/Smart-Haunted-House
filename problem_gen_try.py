@@ -38,7 +38,6 @@ def solve_on_the_spot(client):
                 if action_instance.action.name == "trigger_game_2_hand":
                     client.publish("haunted_house/actuators/game2/hand", json.dumps({"action": "ACTUATE"}))
 
-# 3. MQTT BACKGROUND EVENT LISTENER
 def on_message(client, userdata, msg):
     global sensor_triggered_state
     payload = json.loads(msg.payload.decode())
@@ -55,5 +54,5 @@ client.on_message = on_message
 client.connect("localhost", 1883, 60)
 client.subscribe("haunted_house/sensors/+/+")
 
-print("Central Brain Online. Listening for incoming network triggers...")
-client.loop_forever()  # Completely event-driven, handles incoming network streams instantly
+print("listeninggg")
+client.loop_forever() 
