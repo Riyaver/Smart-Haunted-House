@@ -15,6 +15,7 @@ def generate_problem(mqtt_live_state):
     actuator_type = problem.user_type("actuator")
     info_type = problem.user_type("info")
     band_type = problem.user_type("band")
+    game_led_type = problem.user_type("game_led")
     
     band1 = Object("band1", band_type)
     band2 = Object("band2", band_type)
@@ -47,17 +48,17 @@ def generate_problem(mqtt_live_state):
     riddle_timer = Object("riddle_timer_elapsed", info_type)
     exit_timer = Object("exit_timer_elapsed", info_type)
     
-    g1_led = Object("game1_led", actuator_type)
-    g2_led = Object("game2_led", actuator_type)
-    g3_led = Object("game3_led", actuator_type)
-    g4_led = Object("game4_led", actuator_type)
-    g5_led = Object("game5_led", actuator_type)
-    g6_led = Object("game6_led", actuator_type)
+    g1_led = Object("game1_led", game_led_type)
+    g2_led = Object("game2_led", game_led_type)
+    g3_led = Object("game3_led", game_led_type)
+    g4_led = Object("game4_led", game_led_type)
+    g5_led = Object("game5_led", game_led_type)
+    g6_led = Object("game6_led", game_led_type)
     
     
     problem.add_objects([
         band1, game0, game1, game2, game3, game4, game5, game6, band2, band3,
-        pir, light_sensor, angle, ultrasonic_g2, ultrasonic_g3, is_there_scaredy_cat, door, red_led, g1_led, g2_led, g5_led, g6_led,
+        pir, light_sensor, angle, ultrasonic_g2, ultrasonic_g3, door, red_led, g1_led, g2_led, g5_led, g6_led,
         skeleton, hand, riddle, riddle_timer, exit_timer,false_painting, scaredy_cat, scaredy_cat_notif, g3_led, g4_led
     ])
     
@@ -66,9 +67,10 @@ def generate_problem(mqtt_live_state):
     where_info = problem.fluent("where_info")
     sense_thing = problem.fluent("sense_thing")
     actuate_device = problem.fluent("actuate_device")
-    game_0_are_3_ppl_there = problem.fluent("game_0_are_3_ppl_there")
+    #game_0_are_3_ppl_there = problem.fluent("game_0_are_3_ppl_there")
     get_info = problem.fluent("get_info")
     is_complete = problem.fluent("is_complete")
+    door_closed = problem.fluent("door_closed")
     
     # problem.set_initial_value(where_thingy(pir, game0), True)
     # problem.set_initial_value(where_thingy(door, game0), True)
@@ -86,6 +88,7 @@ def generate_problem(mqtt_live_state):
     problem.set_initial_value(where_thingy(false_painting, game3), True)
 
     problem.set_initial_value(where_thingy(scaredy_cat_notif, game4), True)
+    problem.set_initial_value(where_thingy(g4_led, game4), True)
     problem.set_initial_value(where_info(scaredy_cat, game4), True)
 
     problem.set_initial_value(where_thingy(g5_led, game5), True)
@@ -103,6 +106,9 @@ def generate_problem(mqtt_live_state):
         
     # if mqtt_live_state.get("door_g0_sensor_active"):
     #     problem.set_initial_value(sense_thing(pir), True)
+
+    if mqtt_live_state.get("door_sensor_active"):
+        problem.set_initial_value(door_closed, True)
         
     if mqtt_live_state.get("angle_g1_sensor_active"):
         problem.set_initial_value(sense_thing(angle), True)
@@ -114,7 +120,7 @@ def generate_problem(mqtt_live_state):
         problem.set_initial_value(sense_thing(ultrasonic_g3), True)
 
     if mqtt_live_state.get("scaredy_cat_g4_active"):
-        problem.set_initial_value(sense_thing(is_there_scaredy_cat), True)
+        problem.set_initial_value(get_info(scaredy_cat), True)
         
     if mqtt_live_state.get("riddle_g5_active"):
         problem.set_initial_value(get_info(riddle_timer), True)
@@ -129,10 +135,7 @@ def generate_problem(mqtt_live_state):
         problem.set_initial_value(actuate_device(red_led), True)
 
     all_games_complete = And(
-        is_complete(game1),
-        is_complete(game2),
-        is_complete(game5),
-        is_complete(game6)
+        is_complete(game1)
     )
     timeout_reached = actuate_device(red_led)
     
