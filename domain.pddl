@@ -7,6 +7,7 @@
 (:types 
     game info band device - object
     sensor actuator - device
+    game_led - actuator
 
 )
 
@@ -34,21 +35,15 @@
     (get_info ?b - info)
     (is_complete ?g - game)
 )
-   
-
-(:functions 
-)
-
-
 
 (:action game_1_activate
     :parameters 
         (
-            ?game1_led - actuator
-            ?game2_led - actuator
-            ?game3_led - actuator
-            ?game4_led - actuator
-            ?game5_led - actuator
+            ?game1_led - game_led
+            ?game2_led - game_led
+            ?game3_led - game_led
+            ?game4_led - game_led
+            ?game5_led - game_led
             ?g - game
         )
     :precondition (
@@ -71,7 +66,7 @@
     :parameters 
         (
             ?painting - sensor
-            ?game1_led - actuator
+            ?game1_led - game_led
             ?skeleton - actuator
             ?g - game
         )
@@ -94,12 +89,11 @@
 (:action game_2_activate
     :parameters 
         (
-            ?door - sensor
-            ?game1_led - actuator
-            ?game2_led - actuator
-            ?game3_led - actuator
-            ?game4_led - actuator
-            ?game5_led - actuator
+            ?game1_led - game_led
+            ?game2_led - game_led
+            ?game3_led - game_led
+            ?game4_led - game_led
+            ?game5_led - game_led
             ?g - game
         )
     :precondition (
@@ -123,7 +117,7 @@
     :parameters 
         (
             ?ultrasonic - sensor
-            ?game2_led - actuator
+            ?game2_led - game_led
             ?hand - actuator
             ?g - game
         )
@@ -146,18 +140,17 @@
 (:action game_3_activate
     :parameters 
         (
-            ?door - sensor
-            ?game1_led - actuator
-            ?game2_led - actuator
-            ?game3_led - actuator
-            ?game4_led - actuator
-            ?game5_led - actuator
+            ?game1_led - game_led
+            ?game2_led - game_led
+            ?game3_led - game_led
+            ?game4_led - game_led
+            ?game5_led - game_led
             ?g - game
         )
     :precondition (
            and
             (door_closed)
-            (where_thingy ?game1_led ?g)
+            (where_thingy ?game3_led ?g)
         ) 
     :effect (
         and
@@ -174,7 +167,7 @@
     :parameters 
         (
             ?ultrasonic - sensor
-            ?game3_led - actuator
+            ?game3_led - game_led
             ?false_painting - actuator
             ?g - game
         )
@@ -197,18 +190,17 @@
 (:action game_4_activate
     :parameters 
         (
-            ?door - sensor
-            ?game1_led - actuator
-            ?game2_led - actuator
-            ?game3_led - actuator
-            ?game4_led - actuator
-            ?game5_led - actuator
+            ?game1_led - game_led
+            ?game2_led - game_led
+            ?game3_led - game_led
+            ?game4_led - game_led
+            ?game5_led - game_led
             ?g - game
         )
     :precondition (
         and
             (door_closed)
-            (where_thingy ?game1_led ?g)
+            (where_thingy ?game4_led ?g)
         ) 
     :effect (
         and
@@ -227,9 +219,12 @@
             ?g - game
             ?band_notification - actuator
             ?is_there_scaredy_cat - info
+            ?game4_led - game_led
         )
     :precondition (
         and
+        (actuate_device ?game4_led)
+        (where_thingy ?game4_led ?g)
         (get_info ?is_there_scaredy_cat)
         (where_thingy ?band_notification ?g)
         (where_info ?is_there_scaredy_cat ?g)
@@ -245,18 +240,17 @@
 (:action game_5_activate
     :parameters 
         (
-            ?door - sensor
-            ?game1_led - actuator
-            ?game2_led - actuator
-            ?game3_led - actuator
-            ?game4_led - actuator
-            ?game5_led - actuator
+            ?game1_led - game_led
+            ?game2_led - game_led
+            ?game3_led - game_led
+            ?game4_led - game_led
+            ?game5_led - game_led
             ?g - game
         )
     :precondition (
         and
             (door_closed)
-            (where_thingy ?game1_led ?g)
+            (where_thingy ?game5_led ?g)
         ) 
     :effect (
         and
@@ -275,6 +269,7 @@
             ?g - game
             ?riddle - actuator
             ?riddle_timer_elapsed - info
+            ?game5_led - game_led
         )
     :precondition (
         and
@@ -282,6 +277,8 @@
         (get_info ?riddle_timer_elapsed)
         (where_thingy ?riddle ?g)
         (where_info ?riddle_timer_elapsed ?g)
+        (actuate_device ?game5_led)
+        (where_thingy ?game5_led ?g)
         ) 
     :effect (
         and
@@ -296,7 +293,7 @@
         (
             ?g - game
             ?light_sensor - sensor
-            ?game6_led - actuator
+            ?game6_led - game_led
             ?exit_timer_elapsed - info
         )
     :precondition (
