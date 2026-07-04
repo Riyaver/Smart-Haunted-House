@@ -26,6 +26,8 @@
     ;game 5 -> Riddle for torch;
     ;game 6 -> light shone at light sensor
 
+    (door_closed)
+
 
     (actuate_device ?d - actuator)
     (sense_thing ?d - sensor)
@@ -42,7 +44,6 @@
 (:action game_1_activate
     :parameters 
         (
-            ?door - sensor
             ?game1_led - actuator
             ?game2_led - actuator
             ?game3_led - actuator
@@ -52,8 +53,7 @@
         )
     :precondition (
         and
-            (sense_thing ?door)
-            (where_thingy ?door ?g)
+            (door_closed)
             (where_thingy ?game1_led ?g)
         ) 
     :effect (
@@ -104,8 +104,7 @@
         )
     :precondition (
         and
-            (sense_thing ?door)
-            (where_thingy ?door ?g)
+            (door_closed)
             (where_thingy ?game2_led ?g)
         ) 
     :effect (
@@ -157,9 +156,8 @@
         )
     :precondition (
            and
-            (sense_thing ?door)
-            (where_thingy ?door ?g)
-            (where_thingy ?game3_led ?g)
+            (door_closed)
+            (where_thingy ?game1_led ?g)
         ) 
     :effect (
         and
@@ -209,9 +207,8 @@
         )
     :precondition (
         and
-            (sense_thing ?door)
-            (where_thingy ?door ?g)
-            (where_thingy ?game4_led ?g)
+            (door_closed)
+            (where_thingy ?game1_led ?g)
         ) 
     :effect (
         and
@@ -258,9 +255,8 @@
         )
     :precondition (
         and
-            (sense_thing ?door)
-            (where_thingy ?door ?g)
-            (where_thingy ?game5_led ?g)
+            (door_closed)
+            (where_thingy ?game1_led ?g)
         ) 
     :effect (
         and
