@@ -33,7 +33,7 @@ def generate_problem(mqtt_live_state):
     angle =  Object("angle_sensor", sensor_type)
     ultrasonic_g2 = Object("ultrasonic_g2_sensor", sensor_type)
     ultrasonic_g3 = Object("ultrasonic_g3_sensor", sensor_type)
-    is_there_scaredy_cat = Object("sc_g4_sensor", sensor_type)
+    #is_there_scaredy_cat = Object("sc_g4_sensor", sensor_type)
 
     scaredy_cat_notif = Object("scaredy_cat_act", actuator_type)
     door = Object("door_lock", actuator_type)
