@@ -3,8 +3,7 @@
 (define (domain SHH_domain)
 
 ;remove requirements that are not needed
-(:requirements :strips :fluents :durative-actions :timed-initial-literals :typing :conditional-effects :negative-preconditions :duration-inequalities :equality)
-
+(:requirements :strips :typing :negative-preconditions :equality :conditional-effects)
 (:types 
     game info band device - object
     sensor actuator - device
@@ -313,7 +312,7 @@
         and
         (actuate_device ?game3_led)
         (not(actuate_device ?game2_led))
-        (not(actuate_device ?game3_led))
+        (not(actuate_device ?game1_led))
         (not(actuate_device ?game4_led))
         (not(actuate_device ?game5_led))
       )
