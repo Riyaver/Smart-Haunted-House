@@ -71,6 +71,10 @@ def generate_problem(mqtt_live_state):
     get_info = problem.fluent("get_info")
     is_complete = problem.fluent("is_complete")
     door_closed = problem.fluent("door_closed")
+
+    is_for_game4 = problem.fluent("is_for_game4")
+    is_for_game5 = problem.fluent("is_for_game5")
+    is_for_game6 = problem.fluent("is_for_game6")
     
     # problem.set_initial_value(where_thingy(pir, game0), True)
     # problem.set_initial_value(where_thingy(door, game0), True)
@@ -90,14 +94,17 @@ def generate_problem(mqtt_live_state):
     problem.set_initial_value(where_thingy(scaredy_cat_notif, game4), True)
     problem.set_initial_value(where_thingy(g4_led, game4), True)
     problem.set_initial_value(where_info(scaredy_cat, game4), True)
+    problem.set_initial_value(is_for_game4(game4), True)
 
     problem.set_initial_value(where_thingy(g5_led, game5), True)
     problem.set_initial_value(where_thingy(riddle, game5), True)
     problem.set_initial_value(where_info(riddle_timer, game5), True)
+    problem.set_initial_value(is_for_game5(game5), True)
     
     problem.set_initial_value(where_thingy(light_sensor, game6), True)
     problem.set_initial_value(where_thingy(g6_led, game6), True)
     problem.set_initial_value(where_info(exit_timer, game6), True)
+    problem.set_initial_value(is_for_game6(game6), True)
 
     
 
@@ -135,7 +142,12 @@ def generate_problem(mqtt_live_state):
         problem.set_initial_value(actuate_device(red_led), True)
 
     all_games_complete = And(
-        is_complete(game1)
+        is_complete(game1),
+        is_complete(game2),
+        is_complete(game3),
+        is_complete(game4),
+        is_complete(game5),
+        is_complete(game6)
     )
     timeout_reached = actuate_device(red_led)
     
@@ -159,9 +171,9 @@ if __name__ == "__main__":
         "ultrasonic_g3_sensor_active": True,
         "ultrasonic_g2_sensor_active": True,
         "scaredy_cat_g4_active": True,
-        "riddle_timeout_reached": True,
+        "riddle_g5_active": True,
         "exit_timeout_reached": True,
-        "light_sensor_active": True,
+        "light_g6_sensor_active": True,
         "red_led_active": False 
     }
     
