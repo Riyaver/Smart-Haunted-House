@@ -40,38 +40,27 @@
     (is_complete ?g - game)
 )
 
+
+
 (:action game_activate
     :parameters 
         (
-            ?game1_led - game_led
-            ?game2_led - game_led
-            ?game3_led - game_led
-            ?game4_led - game_led
-            ?game5_led - game_led
-            ?g - game
+            ?led - game_led 
+            ?g - game   
         )
     :precondition (
         and
             (door_closed)
-            (where_thingy ?game1_led ?g)
-            (not (= ?game1_led ?game2_led))
-            (not (= ?game2_led ?game3_led))
-            (not (= ?game3_led ?game4_led))
-            (not (= ?game4_led ?game5_led))
-            (not (= ?game4_led ?game2_led))
-            (not (= ?game1_led ?game3_led))
-            (not (= ?game4_led ?game1_led))
-            (not (= ?game1_led ?game5_led))
-            (not (= ?game2_led ?game5_led))
-            (not (= ?game3_led ?game5_led))
-        ) 
+            (where_thingy ?led ?g)
+    ) 
     :effect (
         and
-        (actuate_device ?game1_led)
-        (not(actuate_device ?game2_led))
-        (not(actuate_device ?game3_led))
-        (not(actuate_device ?game4_led))
-        (not(actuate_device ?game5_led))
+        (actuate_device ?led)
+        (forall (?i - game_led)
+            (when (not (= ?i ?led))
+                (not (actuate_device ?i))
+            )
+        )
       )
     ;:expansion
 )
