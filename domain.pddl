@@ -3,7 +3,7 @@
 (define (domain SHH_domain)
 
 ;remove requirements that are not needed
-(:requirements :strips :typing :negative-preconditions :equality :conditional-effects)
+(:requirements :strips :typing :negative-preconditions :equality :conditional-effects :disjunctive-preconditions)
 (:types 
     game info band device - object
     sensor actuator - device
@@ -29,6 +29,10 @@
 
     (door_closed)
 
+    (is_for_game4 ?d - object)
+    (is_for_game5 ?d - object)
+    (is_for_game6 ?d - object)
+
 
     (actuate_device ?d - actuator)
     (sense_thing ?d - sensor)
@@ -36,7 +40,7 @@
     (is_complete ?g - game)
 )
 
-(:action game_1_activate
+(:action game_activate
     :parameters 
         (
             ?game1_led - game_led
@@ -50,6 +54,16 @@
         and
             (door_closed)
             (where_thingy ?game1_led ?g)
+            (not (= ?game1_led ?game2_led))
+            (not (= ?game2_led ?game3_led))
+            (not (= ?game3_led ?game4_led))
+            (not (= ?game4_led ?game5_led))
+            (not (= ?game4_led ?game2_led))
+            (not (= ?game1_led ?game3_led))
+            (not (= ?game4_led ?game1_led))
+            (not (= ?game1_led ?game5_led))
+            (not (= ?game2_led ?game5_led))
+            (not (= ?game3_led ?game5_led))
         ) 
     :effect (
         and
@@ -77,6 +91,7 @@
         (where_thingy ?painting ?g)
         (where_thingy ?skeleton ?g)
         (where_thingy ?game1_led ?g)
+        (not (= ?skeleton ?game1_led))
         ) 
     :effect (
         and
@@ -86,179 +101,27 @@
     ;:expansion
 )
 
-(:action game_2_activate
-    :parameters 
-        (
-            ?game1_led - game_led
-            ?game2_led - game_led
-            ?game3_led - game_led
-            ?game4_led - game_led
-            ?game5_led - game_led
-            ?g - game
-        )
-    :precondition (
-        and
-            (door_closed)
-            (where_thingy ?game2_led ?g)
-        ) 
-    :effect (
-        and
-        (actuate_device ?game2_led)
-        (not(actuate_device ?game1_led))
-        (not(actuate_device ?game3_led))
-        (not(actuate_device ?game4_led))
-        (not(actuate_device ?game5_led))
-      )
-    ;:expansion
-)
-
-
-(:action game_2
-    :parameters 
-        (
-            ?ultrasonic - sensor
-            ?game2_led - game_led
-            ?hand - actuator
-            ?g - game
-        )
-    :precondition (
-        and
-        (sense_thing ?ultrasonic)
-        (actuate_device ?game2_led)
-        (where_thingy ?ultrasonic ?g)
-        (where_thingy ?game2_led ?g)
-        (where_thingy ?hand ?g)
-        ) 
-    :effect (
-        and
-        (actuate_device ?hand)
-        (is_complete ?g)
-      )
-    ;:expansion
-)
-
-(:action game_3_activate
-    :parameters 
-        (
-            ?game1_led - game_led
-            ?game2_led - game_led
-            ?game3_led - game_led
-            ?game4_led - game_led
-            ?game5_led - game_led
-            ?g - game
-        )
-    :precondition (
-           and
-            (door_closed)
-            (where_thingy ?game3_led ?g)
-        ) 
-    :effect (
-        and
-        (actuate_device ?game3_led)
-        (not(actuate_device ?game2_led))
-        (not(actuate_device ?game1_led))
-        (not(actuate_device ?game4_led))
-        (not(actuate_device ?game5_led))
-      )
-    ;:expansion
-)
-
-(:action game_3
-    :parameters 
-        (
-            ?ultrasonic - sensor
-            ?game3_led - game_led
-            ?false_painting - actuator
-            ?g - game
-        )
-    :precondition (
-        and
-        (sense_thing ?ultrasonic)
-        (actuate_device ?game3_led)
-        (where_thingy ?ultrasonic ?g)
-        (where_thingy ?game3_led ?g)
-        (where_thingy ?false_painting ?g)
-        ) 
-    :effect (
-        and
-        (actuate_device ?false_painting)
-        (is_complete ?g)
-      )
-    ;:expansion
-)
-
-(:action game_4_activate
-    :parameters 
-        (
-            ?game1_led - game_led
-            ?game2_led - game_led
-            ?game3_led - game_led
-            ?game4_led - game_led
-            ?game5_led - game_led
-            ?g - game
-        )
-    :precondition (
-        and
-            (door_closed)
-            (where_thingy ?game4_led ?g)
-        ) 
-    :effect (
-        and
-        (actuate_device ?game4_led)
-        (not(actuate_device ?game2_led))
-        (not(actuate_device ?game3_led))
-        (not(actuate_device ?game1_led))
-        (not(actuate_device ?game5_led))
-      )
-    ;:expansion
-)
-
 (:action game_4
     :parameters 
         (
             ?g - game
             ?band_notification - actuator
-            ?is_there_scaredy_cat - info
             ?game4_led - game_led
+            ?scaredy_cat - info
         )
     :precondition (
         and
         (actuate_device ?game4_led)
         (where_thingy ?game4_led ?g)
-        (get_info ?is_there_scaredy_cat)
+        (get_info ?scaredy_cat)
         (where_thingy ?band_notification ?g)
-        (where_info ?is_there_scaredy_cat ?g)
+        (is_for_game4 ?g)
+        (not (= ?band_notification ?game4_led))
         ) 
     :effect (
         and
         (actuate_device ?band_notification)
         (is_complete ?g)
-      )
-    ;:expansion
-)
-
-(:action game_5_activate
-    :parameters 
-        (
-            ?game1_led - game_led
-            ?game2_led - game_led
-            ?game3_led - game_led
-            ?game4_led - game_led
-            ?game5_led - game_led
-            ?g - game
-        )
-    :precondition (
-        and
-            (door_closed)
-            (where_thingy ?game5_led ?g)
-        ) 
-    :effect (
-        and
-        (actuate_device ?game5_led)
-        (not(actuate_device ?game2_led))
-        (not(actuate_device ?game3_led))
-        (not(actuate_device ?game1_led))
-        (not(actuate_device ?game4_led))
       )
     ;:expansion
 )
@@ -274,11 +137,12 @@
     :precondition (
         and
         (not(actuate_device ?riddle))
-        (get_info ?riddle_timer_elapsed)
         (where_thingy ?riddle ?g)
         (where_info ?riddle_timer_elapsed ?g)
         (actuate_device ?game5_led)
         (where_thingy ?game5_led ?g)
+        (is_for_game5 ?g)
+        (get_info ?riddle_timer_elapsed)
         ) 
     :effect (
         and
@@ -304,6 +168,7 @@
         (where_thingy ?light_sensor ?g)
         (where_info ?exit_timer_elapsed ?g)
         (where_thingy ?game6_led ?g)
+        (is_for_game6 ?g)
         ) 
     :effect (
         and
