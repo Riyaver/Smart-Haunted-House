@@ -70,12 +70,11 @@ def generate_problem(mqtt_live_state):
     is_complete = problem.fluent("is_complete")
     door_closed = problem.fluent("door_closed")
     is_sandbox = problem.fluent("is_sandbox")
-    light_locked = problem.fluent("light_locked") # 👈 Registered lock fluent
+    light_locked = problem.fluent("light_locked")
 
     is_for_game4 = problem.fluent("is_for_game4")
     is_for_game5 = problem.fluent("is_for_game5")
     
-    # Topology Configurations
     problem.set_initial_value(is_sandbox(game1), True)
     problem.set_initial_value(is_sandbox(game2), True)
     problem.set_initial_value(is_sandbox(game3), True)
@@ -106,7 +105,6 @@ def generate_problem(mqtt_live_state):
     problem.set_initial_value(where_thingy(g6_led, game6), True)
     problem.set_initial_value(where_thingy(green_led, game6), True)
 
-    # Re-Inject Completed Game Facts directly into PDDL Memory State
     for completed_room in mqtt_live_state.get("completed_games", []):
         if completed_room == "game1": problem.set_initial_value(is_complete(game1), True)
         elif completed_room == "game2": problem.set_initial_value(is_complete(game2), True)
@@ -136,12 +134,11 @@ def generate_problem(mqtt_live_state):
     if mqtt_live_state.get("light_g6_sensor_active"):
         problem.set_initial_value(sense_thing(light_sensor), True)
         
-    # --- SYNCHRONIZE LIGHT CONSTANTS ---
-    problem.set_initial_value(light_locked, False) # Unlocked by default
+    problem.set_initial_value(light_locked, False)
     
     active_led_name = mqtt_live_state.get("active_led_game")
     if active_led_name:
-        problem.set_initial_value(light_locked, True) # 👈 Locked if a guide light is active!
+        problem.set_initial_value(light_locked, True)
         if active_led_name == "game1": problem.set_initial_value(actuate_device(g1_led), True)
         elif active_led_name == "game2": problem.set_initial_value(actuate_device(g2_led), True)
         elif active_led_name == "game3": problem.set_initial_value(actuate_device(g3_led), True)
