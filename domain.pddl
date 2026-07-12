@@ -132,6 +132,9 @@
         (where_thingy ?s ?g6)
         (where_thingy ?led ?g6)
         (where_thingy ?green_led ?g6)
+        (forall (?i - game)
+              ( and(not (= ?i ?g6)) (is_complete ?i) ) 
+        )
         (not (disable_game ?g6))
         
     ) 
