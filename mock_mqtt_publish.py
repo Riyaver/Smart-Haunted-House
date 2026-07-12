@@ -5,7 +5,11 @@ import sys
 def run_simulator():
     client = mqtt.Client()
     try:
+<<<<<<< HEAD
         client.connect("localhost", 1883, 60)
+=======
+        client.connect("localhost", 1883, 70)
+>>>>>>> fab95d7a85f7cac19ae50428dc6246872a69326f
     except Exception as e:
         print(f"({e})")
         sys.exit(1)
