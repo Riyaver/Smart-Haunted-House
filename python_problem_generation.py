@@ -83,6 +83,7 @@ def generate_problem(mqtt_live_state):
     problem.set_initial_value(is_sandbox(game1), True)
     problem.set_initial_value(is_sandbox(game2), True)
     problem.set_initial_value(is_sandbox(game3), True)
+    problem.set_initial_value(is_sandbox(game6), True)
 
     problem.set_initial_value(where_thingy(angle, game1), True)
     problem.set_initial_value(where_thingy(g1_led, game1), True)
