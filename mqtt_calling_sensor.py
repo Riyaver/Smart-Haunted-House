@@ -38,6 +38,7 @@ def run():
                 actions_sequence, goal_achieved, status = generate_problem(mqtt_live_state)
                 
                 if actions_sequence:
+                    print(actions_sequence)
                     for chosen_action in actions_sequence:
                         action_name = chosen_action.action.name
                         params = chosen_action.actual_parameters

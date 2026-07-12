@@ -200,12 +200,18 @@
         (where_thingy ?led ?g6)
         (where_thingy ?green_led ?g6)
 <<<<<<< HEAD
+<<<<<<< HEAD
         (is_complete ?g1)
         (is_complete ?g2)
         (is_complete ?g3)
         (is_complete ?g4)
         (is_complete ?g5)
 =======
+=======
+        (forall (?i - game)
+              ( and(not (= ?i ?g6)) (is_complete ?i) ) 
+        )
+>>>>>>> a2adc22fe857b2e7489c9c0104ec11cfdf2c91e5
         (not (disable_game ?g6))
         
 >>>>>>> fab95d7a85f7cac19ae50428dc6246872a69326f
