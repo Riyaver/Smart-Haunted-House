@@ -215,62 +215,50 @@
             const topic = packet.topic;
             const message = packet.message;
 
-            // 1. Capture countdown updates from Python
             if (topic === 'house/timers/timer_sync') {
                 const currentSeconds = parseInt(message);
                 document.getElementById('main-clock').innerText = formatTime(currentSeconds);
             }
 
-            // 2. Parse live state dictionary update
             if (topic === 'house/planner/state') {
                 try {
                     const state = JSON.parse(message);
                     
-                    // Door lock status
                     const doorEl = document.getElementById('state-door');
                     doorEl.innerText = state.door_sensor_active ? 'Closed' : 'Open';
                     doorEl.className = 'status-badge ' + (state.door_sensor_active ? 'status-active' : 'status-inactive');
                     
-                    // G1 Angle
                     const g1El = document.getElementById('state-g1');
                     g1El.innerText = state.angle_g1_sensor_active ? 'Tilted' : 'Flat';
                     g1El.className = 'status-badge ' + (state.angle_g1_sensor_active ? 'status-active' : 'status-inactive');
 
-                    // G2 Hand Ultrasonic
                     const g2El = document.getElementById('state-g2');
                     g2El.innerText = state.ultrasonic_g2_sensor_active ? 'Detected' : 'Clear';
                     g2El.className = 'status-badge ' + (state.ultrasonic_g2_sensor_active ? 'status-active' : 'status-inactive');
 
-                    // G3 Painting Ultrasonic
                     const g3El = document.getElementById('state-g3');
                     g3El.innerText = state.ultrasonic_g3_sensor_active ? 'Detected' : 'Clear';
                     g3El.className = 'status-badge ' + (state.ultrasonic_g3_sensor_active ? 'status-active' : 'status-inactive');
 
-                    // G4 Heartrate scared trigger
                     const g4El = document.getElementById('state-g4');
                     g4El.innerText = state.scaredy_cat_g4_active ? 'Scared' : 'Calm';
                     g4El.className = 'status-badge ' + (state.scaredy_cat_g4_active ? 'status-active' : 'status-inactive');
 
-                    // Target Player
                     document.getElementById('state-scared-player').innerText = state.highest_scared_player || 'None';
 
-                    // G5 Riddle status
                     const g5El = document.getElementById('state-g5');
                     g5El.innerText = state.riddle_g5_active ? 'Sent' : 'Not Sent';
                     g5El.className = 'status-badge ' + (state.riddle_g5_active ? 'status-active' : 'status-inactive');
 
-                    // G6 Light sensor
                     const g6El = document.getElementById('state-g6');
                     g6El.innerText = state.light_g6_sensor_active ? 'Detected' : 'Clear';
                     g6El.className = 'status-badge ' + (state.light_g6_sensor_active ? 'status-active' : 'status-inactive');
 
 
-                    // Timer expiration status
                     const overEl = document.getElementById('state-game-over');
                     overEl.innerText = state.game_over ? 'Expired' : 'Running';
                     overEl.className = 'status-badge ' + (state.game_over ? 'status-active' : 'status-inactive');
 
-                    // Game checklist updates
                     const completed = state.completed_games || [];
                     const roomsList = ['game1', 'game2', 'game3', 'game4', 'game5', 'game6', 'final_timer'];
                     
@@ -291,7 +279,6 @@
                 }
             }
 
-            // 3. Update PDDL steps list
             if (topic === 'house/planner/actions') {
                 try {
                     const data = JSON.parse(message);
@@ -314,7 +301,6 @@
                 }
             }
 
-            // 4. Update Planner running status text
             if (topic === 'house/planner/status') {
                 try {
                     const data = JSON.parse(message);
@@ -334,7 +320,6 @@
                 }
             }
 
-            // 5. Player raw heartbeats
             const parts = topic.split('/');
             if (parts[1] === 'players' && parts[3] === 'heartbeat') {
                 const player_id = parts[2];
@@ -344,7 +329,6 @@
                 }
             }
 
-            // 6. Jump Scare notification signals
             if (parts[1] === 'players' && parts[3] === 'notifications') {
                 const player_id = parts[2];
                 const card = document.getElementById(`card-${player_id}`);
