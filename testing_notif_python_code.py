@@ -7,7 +7,7 @@ player_hearts = {"player1": 61, "player2": 60, "player3": 60}
 current_target = None
 
 def on_connect(client, userdata, flags, rc, properties=None):
-    print("MQTT connected to notification broker subsystem.")
+    print("MQTT connected")
     client.subscribe("house/players/+/heartbeat")
     client.subscribe("house/actuators/game4/target")
 

@@ -2,7 +2,6 @@ import paho.mqtt.client as mqtt
 import json
 import sys
 
-# Matched to the broker URL inside MainActivity.kt
 MQTT_BROKER = "100.71.35.180"
 MQTT_PORT = 1883
 
