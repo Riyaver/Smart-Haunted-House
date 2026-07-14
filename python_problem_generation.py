@@ -28,12 +28,14 @@ def generate_problem(mqtt_live_state):
     game4 = Object("game4", game_type)
     game5 = Object("game5", game_type)
     game6 = Object("game6", game_type)
+    final_timer = Object("final_timer", game_type)
     
     pir = Object("pir_sensor", sensor_type)
     light_sensor = Object("light_sensor", sensor_type)
     angle =  Object("angle_sensor", sensor_type)
     ultrasonic_g2 = Object("ultrasonic_g2_sensor", sensor_type)
     ultrasonic_g3 = Object("ultrasonic_g3_sensor", sensor_type)
+    timer_done = Object("timer_over", sensor_type)
 
     scaredy_cat_notif = Object("scaredy_cat_act", actuator_type)
     door = Object("door_lock", actuator_type)
@@ -53,11 +55,12 @@ def generate_problem(mqtt_live_state):
     g4_led = Object("game4_led", game_led_type)
     g5_led = Object("game5_led", game_led_type)
     g6_led = Object("game6_led", game_led_type)
+    t_led = Object("timer_led", game_led_type)
     
     problem.add_objects([
-         game1, game2, game3, game4, game5, game6, 
-        pir, light_sensor, angle, ultrasonic_g2, ultrasonic_g3, door, red_led, green_led, g1_led, g2_led, g5_led, g6_led,
-        skeleton, hand, riddle, riddle_timer, false_painting, scaredy_cat, scaredy_cat_notif, g3_led, g4_led
+         game1, game2, game3, game4, game5, game6, final_timer,
+        pir, light_sensor, angle, ultrasonic_g2, ultrasonic_g3, timer_done, door, red_led, green_led, g1_led, g2_led, g5_led, g6_led,
+        skeleton, hand, riddle, riddle_timer, false_painting, scaredy_cat, scaredy_cat_notif, g3_led, g4_led, t_led
     ])
     
     where_thingy = problem.fluent("where_thingy")
@@ -79,6 +82,7 @@ def generate_problem(mqtt_live_state):
     problem.set_initial_value(is_sandbox(game2), True)
     problem.set_initial_value(is_sandbox(game3), True)
     problem.set_initial_value(is_sandbox(game6), True)
+    problem.set_initial_value(is_sandbox(final_timer), True)
 
     problem.set_initial_value(where_thingy(angle, game1), True)
     problem.set_initial_value(where_thingy(g1_led, game1), True)
@@ -105,6 +109,10 @@ def generate_problem(mqtt_live_state):
     problem.set_initial_value(where_thingy(light_sensor, game6), True)
     problem.set_initial_value(where_thingy(g6_led, game6), True)
     problem.set_initial_value(where_thingy(green_led, game6), True)
+
+    problem.set_initial_value(where_thingy(timer_done, final_timer), True)
+    problem.set_initial_value(where_thingy(t_led, final_timer), True)
+    problem.set_initial_value(where_thingy(red_led, final_timer), True)
 
     for completed_room in mqtt_live_state.get("completed_games", []):
         if completed_room == "game1": 
@@ -146,6 +154,9 @@ def generate_problem(mqtt_live_state):
         
     if mqtt_live_state.get("light_g6_sensor_active"):
         problem.set_initial_value(sense_thing(light_sensor), True)
+    
+    if mqtt_live_state.get("game_over"):
+        problem.set_initial_value(sense_thing(timer_done), True)
         
     problem.set_initial_value(light_locked, False)
     
@@ -159,7 +170,6 @@ def generate_problem(mqtt_live_state):
         elif active_led_name == "game5": problem.set_initial_value(actuate_device(g5_led), True)
         elif active_led_name == "game6": problem.set_initial_value(actuate_device(g6_led), True)
 
-    # FIX: Collect remaining game objectives dynamically inside a clean Python list
     goal_conditions = []
     completed_list = mqtt_live_state.get("completed_games", [])
 
@@ -170,11 +180,13 @@ def generate_problem(mqtt_live_state):
     if "game5" not in completed_list: goal_conditions.append(is_complete(game5))
     if "game6" not in completed_list: goal_conditions.append(is_complete(game6))
 
+    goal_conditions.append(is_complete(final_timer))
+
     if goal_conditions:
-        problem.add_goal(Or(goal_conditions))
-    else:
-        # Fallback condition to prevent execution errors if everything is completed
-        problem.add_goal(is_complete(game6))
+        if len(goal_conditions) > 1:
+            problem.add_goal(Or(goal_conditions))
+        else:
+            problem.add_goal(goal_conditions[0])
 
     with OneshotPlanner(name='fast-downward') as planner:
         result = planner.solve(problem)
