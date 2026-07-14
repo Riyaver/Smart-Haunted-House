@@ -22,11 +22,6 @@ def generate_problem(mqtt_live_state):
     band_type = problem.user_type("band")
     game_led_type = problem.user_type("game_led")
     
-    #band1 = Object("band1", band_type)
-    #band2 = Object("band2", band_type)
-    #band3 = Object("band3", band_type)
-    
-    #game0 = Object("game0", game_type) 
     game1 = Object("game1", game_type)
     game2 = Object("game2", game_type)
     game3 = Object("game3", game_type)
@@ -60,11 +55,7 @@ def generate_problem(mqtt_live_state):
     g6_led = Object("game6_led", game_led_type)
     
     problem.add_objects([
-<<<<<<< HEAD
-        band1, game0, game1, game2, game3, game4, game5, game6, band2, band3,
-=======
          game1, game2, game3, game4, game5, game6, 
->>>>>>> fab95d7a85f7cac19ae50428dc6246872a69326f
         pir, light_sensor, angle, ultrasonic_g2, ultrasonic_g3, door, red_led, green_led, g1_led, g2_led, g5_led, g6_led,
         skeleton, hand, riddle, riddle_timer, false_painting, scaredy_cat, scaredy_cat_notif, g3_led, g4_led
     ])
@@ -81,11 +72,8 @@ def generate_problem(mqtt_live_state):
 
     is_for_game4 = problem.fluent("is_for_game4")
     is_for_game5 = problem.fluent("is_for_game5")
-<<<<<<< HEAD
-=======
 
     disable_game = problem.fluent("disable_game")
->>>>>>> fab95d7a85f7cac19ae50428dc6246872a69326f
     
     problem.set_initial_value(is_sandbox(game1), True)
     problem.set_initial_value(is_sandbox(game2), True)
@@ -119,14 +107,6 @@ def generate_problem(mqtt_live_state):
     problem.set_initial_value(where_thingy(green_led, game6), True)
 
     for completed_room in mqtt_live_state.get("completed_games", []):
-<<<<<<< HEAD
-        if completed_room == "game1": problem.set_initial_value(is_complete(game1), True)
-        elif completed_room == "game2": problem.set_initial_value(is_complete(game2), True)
-        elif completed_room == "game3": problem.set_initial_value(is_complete(game3), True)
-        elif completed_room == "game4": problem.set_initial_value(is_complete(game4), True)
-        elif completed_room == "game5": problem.set_initial_value(is_complete(game5), True)
-        elif completed_room == "game6": problem.set_initial_value(is_complete(game6), True)
-=======
         if completed_room == "game1": 
             problem.set_initial_value(is_complete(game1), True)
             problem.set_initial_value(disable_game(game1), True)
@@ -145,7 +125,6 @@ def generate_problem(mqtt_live_state):
         elif completed_room == "game6":
             problem.set_initial_value(is_complete(game6), True)
             problem.set_initial_value(disable_game(game6), True)
->>>>>>> fab95d7a85f7cac19ae50428dc6246872a69326f
 
     if mqtt_live_state.get("door_sensor_active"):
         problem.set_initial_value(door_closed, True)
@@ -180,47 +159,28 @@ def generate_problem(mqtt_live_state):
         elif active_led_name == "game5": problem.set_initial_value(actuate_device(g5_led), True)
         elif active_led_name == "game6": problem.set_initial_value(actuate_device(g6_led), True)
 
-<<<<<<< HEAD
-    all_games_complete = And(
-        is_complete(game1), is_complete(game2), is_complete(game3),
-        is_complete(game4), is_complete(game5), is_complete(game6)
-    )
-    problem.add_goal(all_games_complete)
-=======
+    # FIX: Collect remaining game objectives dynamically inside a clean Python list
+    goal_conditions = []
+    completed_list = mqtt_live_state.get("completed_games", [])
 
-    goal = Fluent("goal", BoolType())
+    if "game1" not in completed_list: goal_conditions.append(is_complete(game1))
+    if "game2" not in completed_list: goal_conditions.append(is_complete(game2))
+    if "game3" not in completed_list: goal_conditions.append(is_complete(game3))
+    if "game4" not in completed_list: goal_conditions.append(is_complete(game4))
+    if "game5" not in completed_list: goal_conditions.append(is_complete(game5))
+    if "game6" not in completed_list: goal_conditions.append(is_complete(game6))
 
-    for g in games:
-        if g not in mqtt_live_state.get("completed_games", []):
-            if g == 'game1':
-                goal = Or(goal, is_complete(game1))
-            elif g == 'game2':
-                goal = Or(goal, is_complete(game2))
-            elif g == 'game3':
-                goal = Or(goal, is_complete(game3))
-            elif g == 'game4':
-                goal = Or(goal, is_complete(game4))
-            elif g == 'game5':
-                goal = Or(goal, is_complete(game5))
-            elif g == 'game6':
-                goal = Or(goal, is_complete(game6))    
+    if goal_conditions:
+        problem.add_goal(Or(goal_conditions))
+    else:
+        # Fallback condition to prevent execution errors if everything is completed
+        problem.add_goal(is_complete(game6))
 
-    print(goal)
-
-    problem.add_goal(goal)
->>>>>>> fab95d7a85f7cac19ae50428dc6246872a69326f
-    
     with OneshotPlanner(name='fast-downward') as planner:
         result = planner.solve(problem)
         if result.status in [PlanGenerationResultStatus.SOLVED_SATISFICING, PlanGenerationResultStatus.SOLVED_OPTIMALLY]:
             actions = result.plan.actions
             if len(actions) == 0:
-<<<<<<< HEAD
-                return [], True
-            return actions, False
-        return [], False
-=======
                 return [], True, result.status
             return actions, False, result.status
         return [], False, result.status
->>>>>>> fab95d7a85f7cac19ae50428dc6246872a69326f
