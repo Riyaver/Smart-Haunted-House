@@ -60,7 +60,9 @@ def timer_countdown_worker(mqtt_client):
 def run():
     global mqtt_live_state
     print("running")
-    
+    client.publish("house/planner/state", json.dumps(mqtt_live_state))
+    client.publish("house/planner/status", json.dumps({"status": "..."}))
+    client.publish("house/planner/actions", json.dumps({"actions": []}))
     while True:
         try:
             topic, payload = message_queue.get(timeout=0.1)
@@ -129,10 +131,20 @@ def run():
         if state_changed:
             print('Detected a state change. Generating a new problem')
             print(f"Current State: {mqtt_live_state}")
+            client.publish("house/planner/state", json.dumps(mqtt_live_state))
+            client.publish("house/planner/status", json.dumps({"status": "PLANNING..."}))
             actions_sequence, goal_achieved, status = generate_problem(mqtt_live_state)
             
             if actions_sequence:
                 print(f"Generated Actions Sequence: {actions_sequence}\n")
+                plan_strings = []
+                for chosen_action in actions_sequence:
+                    action_name = chosen_action.action.name
+                    params_str = [str(p) for p in chosen_action.actual_parameters]
+                    plan_strings.append(f"({action_name} " + " ".join(params_str) + ")")
+                
+                client.publish("house/planner/actions", json.dumps({"actions": plan_strings}))
+                client.publish("house/planner/status", json.dumps({"status": "PLAN GENERATED"}))
                 for chosen_action in actions_sequence:
                     action_name = chosen_action.action.name
                     params = chosen_action.actual_parameters
@@ -177,13 +189,15 @@ def run():
                         client.publish(f"house/actuators/{current_room}/led", json.dumps({"power": "OFF"}))
 
                         if current_room not in mqtt_live_state["completed_games"]:
-                            mqtt_live_state["completed_games"].append(current_room)  
+                            mqtt_live_state["completed_games"].append(current_room)
+                            client.publish("house/planner/state", json.dumps(mqtt_live_state))
                             if not mqtt_live_state["riddle_g5_active"]:
                                 prev_games_solved = all(g in mqtt_live_state["completed_games"] for g in ["game1", "game2", "game3", "game4"])
                                 if prev_games_solved:
                                     print("\n[TRIGGER] Games 1-4 completed!Game 5 activated.")
                                     message_queue.put(("house/timers/virtual_g5", {"trigger": True}))  
             else:
+                client.publish("house/planner/actions", json.dumps({"actions": []}))
                 if status in [PlanGenerationResultStatus.UNSOLVABLE_INCOMPLETELY, PlanGenerationResultStatus.UNSOLVABLE_PROVEN]:
                     print("[STATUS]Waiting for players' heartrate")
                 else:
@@ -191,6 +205,7 @@ def run():
                     print(status)
             if "final_timer" in mqtt_live_state["completed_games"]:
                 print("System shutting down due to timeout failure sequence completion.")
+                client.publish("house/planner/status", json.dumps({"status": "TIMEOUT - GAME OVER"}))
                 return
 
             actual_rooms_won = [g for g in mqtt_live_state["completed_games"] if g != "final_timer"]
