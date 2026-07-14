@@ -3,7 +3,7 @@ import json
 import sys
 
 # Matched to the broker URL inside MainActivity.kt
-MQTT_BROKER = "10.110.66.148"
+MQTT_BROKER = "100.71.35.180"
 MQTT_PORT = 1883
 
 def run_simulator():
