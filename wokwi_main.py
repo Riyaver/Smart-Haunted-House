@@ -18,9 +18,14 @@ SERVO_MIN_DUTY = 40   # Minimum duty cycle for 0 degrees (this value may need ad
 SERVO_MAX_DUTY = 115  # Maximum duty cycle for 180 degrees (this value may need adjustment for your servo)
 
 # MQTT configuration
-MQTT_BROKER = '10.110.66.148'
 MQTT_CLIENT_ID = "Haunted house subscriber"
-MQTT_TOPIC = 'hhouse/#'
+MQTT_TOPIC = 'house/actuators/#'
+MQTT_PORT = 8883
+MQTT_BROKER = "157cc16c2b0443d0931cfacc745a094f.s1.eu.hivemq.cloud"
+MQTT_USER = b"SHH"
+MQTT_PASSWORD = b"grp16_shh"
+
+ssl_paramss={'server_hostname': '157cc16c2b0443d0931cfacc745a094f.s1.eu.hivemq.cloud'}
 
 def set_servo_angle(angle, servo):
     duty = SERVO_MIN_DUTY + (SERVO_MAX_DUTY - SERVO_MIN_DUTY) * angle // 180
@@ -38,7 +43,7 @@ def connect_wifi(ssid, password):
     print('WiFi connected!')
 
 def connect_mqtt():
-    client = MQTTClient(client_id = MQTT_CLIENT_ID, server = MQTT_BROKER, port = 1883, keepalive = 70)
+    client = MQTTClient(client_id = MQTT_CLIENT_ID, server = MQTT_BROKER, port = MQTT_PORT, keepalive = 70, user = MQTT_USER, password = MQTT_PASSWORD, ssl = True, ssl_params = ssl_paramss)
     client.set_callback(on_message)
     client.connect()
     client.subscribe(MQTT_TOPIC)
@@ -49,16 +54,16 @@ def on_message(topic, msg):
     print(topic)
     print(msg)
     #payload = json.loads(msg.payload.decode())
-    if topic == b'hhouse/sensors/angle':
+    if topic == b'house/actuators/game1/device':
         message_dict = eval(str(msg.decode('utf-8')))
-        if message_dict["angle"]:
+        if message_dict["status"]:
             print("Painting Moved. Now dropping the skeleton")
             set_servo_angle(180, skeleton_servo)
         else:
             print("Painting not moved")
-    elif topic == b'hhouse/sensors/ultrasonic_g2':
+    elif topic == b'house/actuators/game2/device':
         message_dict = eval(str(msg.decode('utf-8')))
-        if message_dict["ultasonic_g2"]:
+        if message_dict["status"]:
             print("Sensor triggered. Moving Hand")
             set_servo_angle(180, hand_servo)
         else:
