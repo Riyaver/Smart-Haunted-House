@@ -1,0 +1,141 @@
+import json
+import time
+
+import grovepi
+import paho.mqtt.client as mqtt
+from paho.mqtt.enums import CallbackAPIVersion
+
+
+MQTT_BROKER = "localhost"
+MQTT_PORT = 1883
+
+
+RED_LED_PORT = 3
+GREEN_LED_PORT = 5
+
+#lcd
+
+FALSE_PAINTING_INITIAL_ANGLE = 10
+FALSE_PAINTING_OPEN_ANGLE = 100
+
+grovepi.pinMode(RED_LED_PORT, "OUTPUT")
+grovepi.pinMode(GREEN_LED_PORT, "OUTPUT")
+
+grovepi.pinMode(FALSE_PAINTING_SERVO_PORT, "OUTPUT") #lcd
+
+# Initially turn LEDs off.
+
+grovepi.digitalWrite(RED_LED_PORT, 0)
+grovepi.digitalWrite(GREEN_LED_PORT, 0)
+
+
+def on_message(client, userdata, msg):
+    try:
+        payload = json.loads(msg.payload.decode)
+
+        print(f"\n[MQTT] Topic: {msg.topic}")
+        print(f"[MQTT] Payload: {payload}")
+
+        
+        status = payload.get("status")
+        target_device = payload.get("device_id")
+        action = payload.get("action")
+
+        if status != "TRIGGERED":
+            print(
+                f"[MQTT] Ignoring message with status: "
+                f"{status}")
+            return
+
+        if action != "ACTIVATE":
+            print(
+                f"[MQTT] Ignoring unsupported action: "
+                f"{action}"
+            )
+            return
+
+        if target_device is None:
+            print("[MQTT ERROR] device_id is missing")
+            return
+
+        # Extract current room from:
+        # house/actuators/game1/device
+        topic_parts = msg.topic.split("/")
+
+        if len(topic_parts) != 4:
+            print(f"[MQTT ERROR] Invalid topic: " f"{msg.topic}"
+            )
+            return
+
+        current_room = topic_parts[2]
+
+        print(
+            f"[ACTUATOR] Activating {target_device} "
+            f"inside {current_room}"
+        )
+
+        if target_device == "red_led":
+
+            grovepi.digitalWrite(RED_LED_PORT,1)
+
+            print("[ACTUATOR] Red LED ON")
+
+        elif target_device == "green_led":
+
+            grovepi.digitalWrite(GREEN_LED_PORT,1)
+
+            print("[ACTUATOR] Green LED ON")
+
+        elif target_device in ["false_paint","false_painting"]:
+
+            print("[ACTUATOR] Opening false painting")
+
+            grovepi.servoWrite(
+                FALSE_PAINTING_SERVO_PORT,
+                FALSE_PAINTING_OPEN_ANGLE)
+
+            time.sleep(1)
+
+            print("[ACTUATOR] False painting opened")
+
+        else:
+            print(
+                f"[ACTUATOR ERROR] Unknown device: "
+                f"{target_device}"
+            )
+            return
+        )
+
+    except IOError as error:
+        print("[GROVEPI ERROR]" .format({error}))
+
+    except Exception as error:
+        print("[ACTUATOR ERROR]".format({error}))
+
+client = mqtt.Client()
+
+client.on_message = on_message
+
+client.connect(MQTT_BROKER,MQTT_PORT,60)
+
+
+client.subscribe("house/actuators/+/device")
+
+
+print("[MQTT] GrovePi actuator controller started")
+print("[MQTT] Subscribed to house/actuators/+/device")
+
+
+try:
+    client.loop_forever()
+
+except KeyboardInterrupt:
+    print("\n[SYSTEM] Actuator controller stopped")
+
+    grovepi.digitalWrite(
+        RED_LED_PORT, 0)
+
+    grovepi.digitalWrite(
+        GREEN_LED_PORT, 0)
+
+    client.disconnect()
