@@ -78,10 +78,13 @@ set_servo_angle(90, hand_servo)
 skeleton_servo = PWM(Pin(SKELETON_SERVO_PIN), freq=50)
 set_servo_angle(90, skeleton_servo)
 
-try:
-    while True:
+while True:
+    try:
         mqtt_client.check_msg()
         time.sleep(1)
-except KeyboardInterrupt:
-    print('Disconnected from MQTT broker')
-    mqtt_client.disconnect()
+    except KeyboardInterrupt:
+        print('Disconnected from MQTT broker')
+        mqtt_client.disconnect()
+    except OSError as err:
+        print("OsError")
+        mqtt_client = connect_mqtt()    
