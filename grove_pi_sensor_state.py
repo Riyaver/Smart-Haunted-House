@@ -3,10 +3,10 @@ import json
 import grovepi
 import paho.mqtt.client as mqtt
 
-
-MQTT_BROKER = "localhost"
-MQTT_PORT = 1883
-
+MQTT_PORT = 8883
+MQTT_BROKER = "157cc16c2b0443d0931cfacc745a094f.s1.eu.hivemq.cloud"
+MQTT_USER = "SHH"
+MQTT_PASSWORD = "grp16_shh"
 
 PIR_PORT = 2 #Digital
 ANGLE_SENSOR_PORT = 0 #Analog 
@@ -21,7 +21,6 @@ ULTRASONIC_G2_DISTANCE_CM = 30
 ULTRASONIC_G3_DISTANCE_CM = 30
 LIGHT_THRESHOLD = 600
 
-#pir buzzer 
 
 sensor_state = {
     "door_sensor_active": False,
@@ -34,12 +33,13 @@ sensor_state = {
 pir_people_count = 0
 previous_pir_value = 0
 
-
 client = mqtt.Client()
 
+client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+client.tls_set()
 client.connect(MQTT_BROKER, MQTT_PORT, 60)
-client.loop_start()
 
+client.loop_start()
 
 grovepi.pinMode(PIR_PORT, "INPUT")
 grovepi.pinMode(BUZZER_PORT, "OUTPUT")
@@ -202,5 +202,6 @@ while True:
         client.loop_stop()
         client.disconnect()
         break
+
 
 time.sleep(0.5)
