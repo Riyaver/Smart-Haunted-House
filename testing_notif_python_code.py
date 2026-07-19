@@ -3,7 +3,11 @@ import json
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
 
-player_hearts = {"player1": 61, "player2": 60, "player3": 60}
+MQTT_PORT = 8883
+MQTT_BROKER = "157cc16c2b0443d0931cfacc745a094f.s1.eu.hivemq.cloud"
+MQTT_USER = "SHH"
+MQTT_PASSWORD = "grp16_shh"
+player_hearts = {"player1": 60, "player2": 60, "player3": 60}
 current_target = None
 
 def on_connect(client, userdata, flags, rc, properties=None):
@@ -54,7 +58,10 @@ def on_message(client, userdata, msg):
 client = mqtt.Client(callback_api_version=CallbackAPIVersion.VERSION2)
 client.on_connect = on_connect
 client.on_message = on_message
-client.connect("localhost", 1883, 60)
+#client.connect("localhost", 1883, 60)
+client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+client.tls_set()
+client.connect(MQTT_BROKER, MQTT_PORT, 60)
 
 print("Waiting for players' heartrates")
 client.loop_forever()

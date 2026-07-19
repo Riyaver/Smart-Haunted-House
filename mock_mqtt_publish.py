@@ -2,15 +2,18 @@ import paho.mqtt.client as mqtt
 import json
 import sys
 
-# Matched to the broker URL inside MainActivity.kt
-MQTT_BROKER = "100.71.35.180"
-MQTT_PORT = 1883
-
+# MQTT_BROKER = "10.110.66.148"
+MQTT_PORT = 8883
+MQTT_BROKER = "157cc16c2b0443d0931cfacc745a094f.s1.eu.hivemq.cloud"
+MQTT_USER = "SHH"
+MQTT_PASSWORD = "grp16_shh"
 def run_simulator():
     client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION1)
     try:
         print(f"Connecting to broker at {MQTT_BROKER}...")
-        client.connect(MQTT_BROKER, MQTT_PORT, 70)
+        client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+        client.tls_set()
+        client.connect(MQTT_BROKER, MQTT_PORT, 60)
     except Exception as e:
         print(f"Connection Failed: ({e})")
         sys.exit(1)

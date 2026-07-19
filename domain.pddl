@@ -83,6 +83,7 @@
         (actuate_device ?game4_led)
         (where_thingy ?game4_led ?g)
         (get_info ?scaredy_cat)
+        (where_info ?scaredy_cat ?g)
         (where_thingy ?band_notification ?g)
         (is_for_game4 ?g)
         (not (= ?band_notification ?game4_led))

@@ -24,7 +24,7 @@ import com.example.testing_notification.ui.theme.*
 class MainActivity : ComponentActivity() {
 
     private lateinit var mqttClient: MqttClient
-    private val brokerUrl = "tcp://100.71.35.180:1883"
+    private val brokerUrl = "tcp://172.28.186.242:1883"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

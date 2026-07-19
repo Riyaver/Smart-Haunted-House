@@ -9,6 +9,12 @@ import sys
 from python_problem_generation import generate_problem
 from unified_planning.engines import PlanGenerationResultStatus
 
+# MQTT_BROKER = "10.110.66.148"
+MQTT_PORT = 8883
+MQTT_BROKER = "157cc16c2b0443d0931cfacc745a094f.s1.eu.hivemq.cloud"
+MQTT_USER = "SHH"
+MQTT_PASSWORD = "grp16_shh"
+
 mqtt_live_state = {
     "door_sensor_active": False,
     "remaining_time": 300,
@@ -209,9 +215,10 @@ def run():
                 return
 
             actual_rooms_won = [g for g in mqtt_live_state["completed_games"] if g != "final_timer"]
-            if len(actual_rooms_won) >= 6:
-                print('GG')
-                return
+            for g in mqtt_live_state["completed_games"]:
+                if g == "game6":
+                    print('GG')
+                    return
             
 
 def on_message(client, userdata, msg):
@@ -225,9 +232,14 @@ def on_message(client, userdata, msg):
         except Exception as inner_e:
             print(f"Error parsing incoming payload data: {inner_e}")
 
+
+
+
 client = mqtt.Client(callback_api_version=CallbackAPIVersion.VERSION2)
 client.on_message = on_message
-client.connect("localhost", 1883, 60)
+client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+client.tls_set()
+client.connect(MQTT_BROKER, MQTT_PORT, 60)
 client.subscribe("house/#")
 
 print("...yea boi...")
