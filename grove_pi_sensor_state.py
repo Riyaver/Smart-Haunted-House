@@ -11,14 +11,13 @@ MQTT_PASSWORD = "grp16_shh"
 PIR_PORT = 2 #Digital
 ANGLE_SENSOR_PORT = 0 #Analog 
 ULTRASONIC_G2_PORT = 4 #Digital 
-ULTRASONIC_G3_PORT = 7 #Digital
 LIGHT_SENSOR_PORT = 1 #Analog
 BUZZER_PORT = 8 
+BUTTON_PORT = 3
 
 NUMBER_OF_PEOPLE = 3
 ANGLE_THRESHOLD = 500
 ULTRASONIC_G2_DISTANCE_CM = 30
-ULTRASONIC_G3_DISTANCE_CM = 30
 LIGHT_THRESHOLD = 600
 
 
@@ -141,11 +140,9 @@ while True:
             # ULTRASONIC SENSOR GAME 3
             if not sensor_state["ultrasonic_g3_sensor_active"]:
 
-                distance_g3 = grovepi.ultrasonicRead(
-                    ULTRASONIC_G3_PORT
-                )
+                button_state = grovepi.digitalRead(BUTTON_PORT)
 
-                if (0 < distance_g3 <= ULTRASONIC_G3_DISTANCE_CM):
+                if (button_state==1):
 
                     sensor_state["ultrasonic_g3_sensor_active"] = True
 
