@@ -24,7 +24,10 @@ import com.example.testing_notification.ui.theme.*
 class MainActivity : ComponentActivity() {
 
     private lateinit var mqttClient: MqttClient
-    private val brokerUrl = "tcp://172.28.186.242:1883"
+    private val brokerUrl = "ssl://157cc16c2b0443d0931cfacc745a094f.s1.eu.hivemq.cloud"
+    private val mqttUser = "SHH"
+    private val mqttPassword = "grp16_shh"
+    //private val brokerUrl = "tcp://10.110.66.148:1883"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +45,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun SHHScreen() {
         var emergencyAlertText by remember { mutableStateOf("") }
-        var liveSyncTime by remember { mutableStateOf(60) }
+        var liveSyncTime by remember { mutableStateOf(300) }
         val playerOptions = remember { listOf("Player 1", "Player 2", "Player 3") }
         var expanded by remember { mutableStateOf(false) }
         var selectedPlayer by remember { mutableStateOf(playerOptions[0]) }
@@ -150,17 +153,22 @@ class MainActivity : ComponentActivity() {
                                 try {
                                     val clientId = UUID.randomUUID().toString()
                                     mqttClient = MqttClient(brokerUrl, clientId, null)
+
                                     val options = MqttConnectOptions().apply {
                                         isAutomaticReconnect = true
                                         isCleanSession = true
+                                        userName = mqttUser
+                                        password = mqttPassword.toCharArray()
+                                        socketFactory = javax.net.ssl.SSLSocketFactory.getDefault()
                                     }
                                     mqttClient.connect(options)
 
-                                    isConnected = true
-                                    statusText = "Connected as: $selectedPlayer"
-                                    statusColor = Color.Green
+                                    runOnUiThread {
+                                        isConnected = true
+                                        statusText = "Connected as: $selectedPlayer"
+                                        statusColor = Color.Green
+                                    }
 
-                                    // Switch subscriptions over to the house/ ecosystem layout
                                     mqttClient.subscribe("house/timers/timer_sync") { _, message ->
                                         val incomingTime = String(message.payload).toIntOrNull() ?: 60
                                         runOnUiThread {
@@ -168,7 +176,9 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
                                     mqttClient.subscribe("house/players/$topicId/notifications") { _, message ->
-                                        notificationText = String(message.payload)
+                                        runOnUiThread {
+                                            notificationText = String(message.payload)
+                                        }
                                     }
 
                                     mqttClient.subscribe("house/alerts/emergency") { _, message ->
@@ -182,10 +192,13 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
 
-                                } catch (e: MqttException) {
+                                } catch (e: Exception) {
                                     e.printStackTrace()
-                                    statusText = "Connection Failed!"
-                                    statusColor = Color.Red
+                                    runOnUiThread {
+                                        statusText = "Failed: ${e.localizedMessage ?: "Unknown Error"}"
+                                        statusColor = Color.Red
+                                        isConnected = false
+                                    }
                                 }
                             }
                         }
