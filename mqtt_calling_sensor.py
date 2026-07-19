@@ -76,90 +76,77 @@ def run():
             continue
 
         state_changed = False
-        timer_started = False
 
-        if topic.startswith("house/sensor/"):
+        if topic == "house/sensors/door_sensor_active":
             state_name = payload.get("state_name")
             state_value = payload.get("value")
+            if (state_name == "door_sensor_active" and state_value is True):
+                mqtt_live_state["door_sensor_active"] = True
+                client.publish("house/planner/state", json.dumps(mqtt_live_state))
+                client.publish("house/planner/status", json.dumps({"status": "PLANNING..."}))
+                print("\nDoor closed and timer starts")
+                threading.Thread(
+                            target=timer_countdown_worker, 
+                            args=(client,), 
+                            daemon=True
+                        ).start()
 
-            if state_name not in mqtt_live_state:
-                print(f"[MQTT ERROR] Unknown state: {state_name}")
-                continue
+        elif topic == "house/sensors/angle":
+             if payload.get("state_name") == "angle_g1_sensor_active":   
+                    new_value = payload.get("value")
 
-            if not isinstance(mqtt_live_state[state_name], bool):
-                print(f"[MQTT ERROR] {state_name} is not a Boolean sensor state.")
-                continue
-
-            if not isinstance(state_value, bool):
-                print(f"[MQTT ERROR] Value for {state_name} must be Boolean.")
-                continue
-
-            if topic == "house/sensors/door_sensor_active":
-                state_name = payload.get("state_name")
-                state_value = payload.get("value")
-                if (state_name == "door_sensor_active" and state_value is True and not timer_started):
-                    timer_started = True
-                    mqtt_live_state["door_sensor_active"] = True
-                    
-                    print("\nDoor closed and timer starts")
-                    threading.Thread(target=timer_countdown_worker, args=(client,), daemon=True).start()
-    
-            elif topic == "house/sensors/angle":
-                    if payload.get("state_name") == "angle_g1_sensor_active":   
-                        new_value = payload.get("value")
-
-                        if new_value != mqtt_live_state["angle_g1_sensor_active"]:
+                    if new_value != mqtt_live_state["angle_g1_sensor_active"]:
                             mqtt_live_state["angle_g1_sensor_active"] = new_value
                             state_changed = True
-    
-            elif topic == "house/sensors/ultrasonic_g2":
-                    if payload.get("state_name") == "ultrasonic_g2_sensor_active":   
-                        new_value = payload.get("value")
 
-                        if new_value != mqtt_live_state["ultrasonic_g2_sensor_active"]:
-                            mqtt_live_state["ultrasonic_g2_sensor_active"] = new_value
-                            state_changed = True
-    
-            elif topic == "house/sensors/ultrasonic_g3":
-                    if payload.get("state_name") == "ultrasonic_g3_sensor_active":   
-                        new_value = payload.get("value")
+        elif topic == "house/sensors/ultrasonic_g2":
+            if payload.get("state_name") == "ultrasonic_g2_sensor_active":   
+                new_value = payload.get("value")
 
-                        if new_value != mqtt_live_state["ultrasonic_g3_sensor_active"]:
-                            mqtt_live_state["ultrasonic_g3_sensor_active"] = new_value
-                            state_changed = True
-    
-            elif topic == "house/sensors/scared":
-                is_scared = payload.get("heartrate", False)
-                target_player = payload.get("player", "player1")
-                if (is_scared != mqtt_live_state["scaredy_cat_g4_active"]) or (is_scared and target_player != mqtt_live_state.get("highest_scared_player")):
-                    state_changed = True
-                mqtt_live_state["scaredy_cat_g4_active"] = is_scared
-                mqtt_live_state["highest_scared_player"] = target_player
-                        
-            elif topic == "house/sensors/riddle":
-                if payload.get("solved") != mqtt_live_state["riddle_g5_active"]:
-                    state_changed = True
-                mqtt_live_state["riddle_g5_active"] = payload.get("solved")
-    
-            elif topic == "house/sensors/light":
-                    if payload.get("state_name") == "light_g6_sensor_active":   
-                        new_value = payload.get("value")
-
-                        if new_value != mqtt_live_state["light_g6_sensor_active"]:
-                            mqtt_live_state["light_g6_sensor_active"] = new_value
-                            state_changed = True
-    
-            elif topic == "house/timers/virtual_g5":
-                    if payload.get("trigger") and not mqtt_live_state["riddle_g5_active"]:
-                        mqtt_live_state["riddle_g5_active"] = True
+                if new_value != mqtt_live_state["ultrasonic_g2_sensor_active"]:
+                        mqtt_live_state["ultrasonic_g2_sensor_active"] = new_value
                         state_changed = True
-                        print("\n[TRIGGER] Game 5 Riddle activated!")
-            
-            elif topic == "house/timers/game_over":
-                if payload.get("status") == "expired":
-                    print("\nTIMEOUTTT")
+
+        elif topic == "house/sensors/ultrasonic_g3":
+            if payload.get("state_name") == "ultrasonic_g3_sensor_active":   
+                new_value = payload.get("value")
+
+                if new_value != mqtt_live_state["ultrasonic_g3_sensor_active"]:
+                    mqtt_live_state["ultrasonic_g3_sensor_active"] = new_value
                     state_changed = True
-                mqtt_live_state["game_over"] = payload.get("status") 
+
+        elif topic == "house/sensors/scared":
+            is_scared = payload.get("heartrate", False)
+            target_player = payload.get("player", "player1")
+            if (is_scared != mqtt_live_state["scaredy_cat_g4_active"]) or (is_scared and target_player != mqtt_live_state.get("highest_scared_player")):
+                state_changed = True
+            mqtt_live_state["scaredy_cat_g4_active"] = is_scared
+            mqtt_live_state["highest_scared_player"] = target_player
+                    
+        elif topic == "house/sensors/riddle":
+            if payload.get("solved") != mqtt_live_state["riddle_g5_active"]:
+                state_changed = True
+            mqtt_live_state["riddle_g5_active"] = payload.get("solved")
+
+        elif topic == "house/sensors/light":
+            if payload.get("state_name") == "light_g6_sensor_active":   
+                new_value = payload.get("value")
+
+                if new_value != mqtt_live_state["light_g6_sensor_active"]:
+                    mqtt_live_state["light_g6_sensor_active"] = new_value
+                    state_changed = True
+
+        elif topic == "house/timers/virtual_g5":
+                if payload.get("trigger") and not mqtt_live_state["riddle_g5_active"]:
+                    mqtt_live_state["riddle_g5_active"] = True
+                    state_changed = True
+                    print("\n[TRIGGER] Game 5 Riddle activated!")
+        
+        elif topic == "house/timers/game_over":
+            if payload.get("status") == "expired":
+                print("\nTIMEOUTTT")
+                state_changed = True
+            mqtt_live_state["game_over"] = payload.get("status") 
 
         if state_changed:
             print('Detected a state change. Generating a new problem')
@@ -197,7 +184,7 @@ def run():
 
                         if action_name == "game_5":
                             print("riddle sent")
-                            riddle_payload = "idk bro"
+                            riddle_payload = "When you're lost in the darkness, look for the light."
                             for player in ["player1", "player2", "player3"]:
                                 client.publish(f"house/players/{player}/notifications", riddle_payload)
                             sleep(0.5)
@@ -246,6 +233,7 @@ def run():
                 if g == "game6":
                     print('GG')
                     return
+            
 
 def on_message(client, userdata, msg):
     try:
@@ -257,6 +245,8 @@ def on_message(client, userdata, msg):
             message_queue.put((msg.topic, {"value": raw_val}))
         except Exception as inner_e:
             print(f"Error parsing incoming payload data: {inner_e}")
+
+
 
 
 client = mqtt.Client(callback_api_version=CallbackAPIVersion.VERSION2)

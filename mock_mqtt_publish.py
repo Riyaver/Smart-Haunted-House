@@ -19,7 +19,7 @@ def run_simulator():
         sys.exit(1)
 
     sensor_blueprint = {
-        "1": {"topic": "house/sensors/pir", "key": "count", "t_val": 3, "f_val": 0, "name": "PIR (Door Sensor)"},
+        "1": {"topic": "house/sensors/door_sensor_active", "key": "door_sensor_active", "t_val": True, "f_val": False, "name": "PIR (Door Sensor)"},
         "2": {"topic": "house/sensors/angle", "key": "angle", "t_val": True, "f_val": False, "name": "Angle (G1 Painting)"},
         "3": {"topic": "house/sensors/ultrasonic_g2", "key": "ultasonic_g2", "t_val": True, "f_val": False, "name": "Ultrasonic G2 (G2 Hand)"},
         "4": {"topic": "house/sensors/ultrasonic_g3", "key": "ultrasonic_g3", "t_val": True, "f_val": False, "name": "Ultrasonic G3 (G3 Painting)"},
@@ -65,6 +65,12 @@ def run_simulator():
                 
                 payload_json = json.dumps(payload_dict)
                 client.publish(target["topic"], payload_json)
+                client.publish(
+                    "house/sensor/door_sensor_active",
+                    json.dumps({
+                        "state_name": "door_sensor_active",
+                        "value": True
+                    }))
                 print(f"Published -> Topic: '{target['topic']}' | Data: {payload_json}")
         
 if __name__ == "__main__":

@@ -51,7 +51,7 @@ def on_message(client, userdata, msg):
                     if p != target_player:
                         client.publish(f"house/players/{p}/notifications", "")
 
-                client.publish(f"house/players/{target_player}/notifications", "BOO!!")
+                client.publish(f"house/players/{target_player}/notifications", "I'm closer than you think")
         except Exception as e:
             print(f"Error handling authorized jump scare delivery: {e}")
 
