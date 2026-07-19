@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "author": "jose rangel",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": -86.4,
+      "left": -100.76,
+      "attrs": { "env": "micropython-20231227-v1.22.0" }
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "servo1",
+      "top": -30.8,
+      "left": 163.2,
+      "attrs": { "horn": "double", "hornColor": "red" }
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "servo2",
+      "top": -174.8,
+      "left": 172.8,
+      "attrs": { "hornColor": "blue" }
+    },
+    { "type": "wokwi-vcc", "id": "vcc1", "top": 29.56, "left": 28.8, "attrs": {} },
+    { "type": "wokwi-gnd", "id": "gnd1", "top": -65.8, "left": 105.4, "rotate": 180, "attrs": {} }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "esp:3V3", "servo1:V+", "green", [ "h-19.05", "v57.7" ] ],
+    [ "esp:GND.1", "servo1:GND", "black", [ "h0" ] ],
+    [ "esp:33", "servo1:PWM", "yellow", [ "h-28.65", "v-19" ] ],
+    [ "esp:3V3", "servo2:V+", "green", [ "h-19.05", "v57.7" ] ],
+    [ "esp:GND.1", "servo2:GND", "black", [ "h0" ] ],
+    [ "esp:32", "servo2:PWM", "yellow", [ "h-28.65", "v-19" ] ]
+  ],
+  "dependencies": {}
+}
