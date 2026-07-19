@@ -2,12 +2,16 @@ import json
 import time
 
 import grovepi
+from grove_rgb_lcd import *
+
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
 
 
-MQTT_BROKER = "localhost"
-MQTT_PORT = 1883
+MQTT_BROKER = "157cc16c2b0443d0931cfacc745a094f.s1.eu.hivemq.cloud"
+MQTT_PORT = 8883
+MQTT_USER = "SHH"
+MQTT_PASSWORD = "grp16_shh"
 
 
 RED_LED_PORT = 3
@@ -21,12 +25,94 @@ FALSE_PAINTING_OPEN_ANGLE = 100
 grovepi.pinMode(RED_LED_PORT, "OUTPUT")
 grovepi.pinMode(GREEN_LED_PORT, "OUTPUT")
 
-grovepi.pinMode(FALSE_PAINTING_SERVO_PORT, "OUTPUT") #lcd
+#grovepi.pinMode(FALSE_PAINTING_SERVO_PORT, "OUTPUT") #lcd
 
 # Initially turn LEDs off.
 
 grovepi.digitalWrite(RED_LED_PORT, 0)
 grovepi.digitalWrite(GREEN_LED_PORT, 0)
+
+lefteye = [0b00100,
+	0b00010,
+	0b01000,
+	0b01100,
+	0b01110,
+	0b01110,
+	0b01110,
+	0b00000]
+
+righteye = [0b00100,
+	0b01000,
+	0b00010,
+	0b00110,
+	0b01110,
+	0b01110,
+	0b01110,
+	0b00000]
+
+eye = [0b00000,
+	0b01110,
+	0b01110,
+	0b01110,
+	0b01110,
+	0b01110,
+	0b01110,
+	0b00000]
+
+line = [0b00000,
+	0b00000,
+	0b00000,
+	0b11111,
+	0b00000,
+	0b00000,
+	0b00000,
+	0b00000]
+
+left_smile = [0b01000,
+	0b00100,
+	0b00010,
+	0b00001,
+	0b00000,
+	0b00000,
+	0b00000,
+	0b00000]
+
+right_smile = [0b00010,
+	0b00100,
+	0b01000,
+	0b10000,
+	0b00000,
+	0b00000,
+	0b00000,
+	0b00000]
+
+fang = [0b00000,
+	0b00000,
+	0b00000,
+	0b11111,
+	0b01110,
+	0b00100,
+	0b00000,
+	0b00000]
+
+def set_lcd_mad():
+    setRGB(255,0,0)
+    setText('       ' + chr(0) + chr(0) + '\n' +'      '  + chr(1) + chr(1) + chr(1) + chr(1) )
+    sleep(0.5)
+    setText('       ' + chr(5) + chr(6) + '\n' +'      '  + chr(2) + chr(4) + chr(4) + chr(3) )
+
+def set_lcd_happy():
+    setRGB(0,255,0)
+    setText('       ' + chr(0) + chr(0) + '\n' +'      ' + chr(2) + chr(1) + chr(1) + chr(3) )
+
+setText('')
+create_char(0, eye)
+create_char(1, line)
+create_char(2, left_smile)
+create_char(3, right_smile)
+create_char(4, fang)
+create_char(5, lefteye)
+create_char(6, righteye)
 
 
 def on_message(client, userdata, msg):
@@ -88,11 +174,7 @@ def on_message(client, userdata, msg):
 
         elif target_device in ["false_paint","false_painting"]:
 
-            print("[ACTUATOR] Opening false painting")
-
-            grovepi.servoWrite(
-                FALSE_PAINTING_SERVO_PORT,
-                FALSE_PAINTING_OPEN_ANGLE)
+            set_lcd_mad()
 
             time.sleep(1)
 
@@ -112,18 +194,21 @@ def on_message(client, userdata, msg):
     except Exception as error:
         print("[ACTUATOR ERROR]".format({error}))
 
-client = mqtt.Client()
 
+client = mqtt.Client(callback_api_version=CallbackAPIVersion.VERSION2)
 client.on_message = on_message
-
-client.connect(MQTT_BROKER,MQTT_PORT,60)
-
+client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+client.tls_set()
+client.connect(MQTT_BROKER, MQTT_PORT, 60)
+#client.subscribe("house/#")
 
 client.subscribe("house/actuators/+/device")
 
 
 print("[MQTT] GrovePi actuator controller started")
 print("[MQTT] Subscribed to house/actuators/+/device")
+
+set_lcd_happy()
 
 
 try:
